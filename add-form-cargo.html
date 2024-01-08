@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="ua">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://getbootstrap.com/docs/4.0/examples/signin/signin.css" crossorigin="anonymous"/>
+</head>
+<body>
+    <div class="container">
+        <form id="newOrderForm" class="form-signin">
+            <h2 class="form-signin-heading">Додати нове замовлення</h2>
+
+            <label for="dateField">Дата:</label>
+            <input type="date" id="dateField" name="dateField" class="form-control" required><br>
+
+            <label for="quantity">Кількість:</label>
+            <input type="text" id="quantity" name="quantity" class="form-control" required><br>
+
+            <label for="units">Одиниці:</label>
+            <select id="units" name="units" class="form-control" required>
+                <option value="ТН">ТН</option>
+                <option value="ШТ">ШТ</option>
+                <option value="М3">М3</option>
+            </select><br>
+
+            <label for="product">Товар:</label>
+            <select id="product" name="product" class="form-control" required>
+                <option value="щебінь">Щебінь</option>
+                <option value="пісок">Пісок</option>
+                <option value="асфальт">Асфальт</option>
+            </select><br>
+
+            <label for="legalEntity">Юр_особа:</label>
+            <select id="legalEntity" name="legalEntity" class="form-control" required>
+                <option value="ТОВ">ТОВ</option>
+                <option value="ПП">ПП</option>
+                <option value="ФОП">ФОП</option>
+            </select><br>
+
+            <label for="counterparty">Замовник:</label>
+            <input type="text" id="counterparty" name="counterparty" class="form-control" required><br>
+
+            <label for="unloadingAddresses">Пункт_вiдвантаження:</label>
+            <input type="text" id="unloadingAddresses" name="unloadingAddresses" class="form-control" required>
+            <button type="button" class="btn btn-secondary" onclick="openGoogleMaps('unloadingAddresses')">Открыть Google Maps</button><br>
+
+            <label for="mapsLocation">Локацiя:</label>
+            <input type="text" id="mapsLocation" name="mapsLocation" class="form-control" required>
+            <button type="button" class="btn btn-secondary" onclick="openGoogleMaps('mapsLocation')">Открыть Google Maps</button><br>
+
+            <label for="phoneNumberConsignee">Контакти:</label>
+            <input type="text" id="phoneNumberConsignee" name="phoneNumberConsignee" class="form-control" required><br>
+
+            <label for="fullName">ФИО:</label>
+            <input type="text" id="fullName" name="fullName" class="form-control" required><br>
+
+            <label for="cost">Цiна:</label>
+            <input type="text" id="cost" name="cost" class="form-control" required><br>
+
+            <label for="descriptions">Додаткова_iнформацiя:</label>
+            <input type="text" id="descriptions" name="descriptions" class="form-control" required><br>
+
+            <div id="errorMessage" style="color: red;"></div>
+
+            <button type="button" class="btn btn-lg btn-primary btn-block" onclick="validateAndSaveOrder()">SAVE</button>
+        </form>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.7.7/handlebars.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/handlebars/dist/handlebars.min.js"></script>
+    <script src="script.js"></script>
+    <script>
+        function openGoogleMaps(elementId) {
+            var locationInput = document.getElementById(elementId);
+            var location = locationInput.value;
+
+            if (location) {
+                var coordinates = location.split(', ');
+                window.open('https://www.google.com/maps?q=' + coordinates[0] + ',' + coordinates[1]);
+            } else {
+                alert('Пожалуйста, введите адрес для просмотра на Google Maps.');
+            }
+        }
+
+        function validateAndSaveOrder() {
+            var form = document.getElementById('newOrderForm');
+            var formData = new FormData(form);
+
+            var isValid = true;
+            var errorMessage = 'Пожалуйста, заповніть всі поля:';
+
+            formData.forEach(function (value, key) {
+                if (!value.trim()) {
+                    // Маппинг английских имен полей на украинские
+                    var fieldNames = {
+                        'dateField': 'Дата',
+                        'quantity': 'Кількість',
+                        'units': 'Одиниці',
+                        'product': 'Товар',
+                        'legalEntity': 'Юр_особа',
+                        'counterparty': 'Замовник',
+                        'unloadingAddresses': 'Пункт_вiдвантаження',
+                        'mapsLocation': 'Локацiя',
+                        'phoneNumberConsignee': 'Контакти',
+                        'fullName': 'ФИО',
+                        'cost': 'Цiна',
+                        'descriptions': 'Додаткова_iнформацiя'
+                    };
+
+                    errorMessage += '\n - ' + fieldNames[key];
+                    isValid = false;
+                }
+            });
+
+            if (!isValid) {
+                document.getElementById('errorMessage').innerText = errorMessage;
+                return;
+            }
+
+            // Сбрасываем сообщение об ошибке
+            document.getElementById('errorMessage').innerText = '';
+
+            // Преобразуем данные формы в объект
+            var orderData = {};
+            formData.forEach((value, key) => {
+                orderData[key] = value;
+            });
+
+            // Отправляем данные на сервер
+            fetch('http://localhost:8080/api/orders/add', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(orderData),
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Перенаправляем пользователя на другую страницу
+                window.location.href = 'home-cargo.html';
+            })
+            .catch(error => console.error('Помилка:', error));
+        }
+    </script>
+</body>
+</html>

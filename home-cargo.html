@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ua">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://getbootstrap.com/docs/4.0/examples/signin/signin.css" crossorigin="anonymous"/>
+    <link rel="stylesheet" type="text/css" href="styles.css">
+</head>
+<body>
+
+<div class="container-fluid">
+    <header class="d-flex justify-content-between mt-3">
+        <div>
+            <h1 class="text-center">ЗАЯВКИ</h1>
+        </div>
+        <div>
+            <a class="btn btn-primary add-order-button" href="./add-form-cargo.html">Добавить заявку</a>
+            <form th:action="@{/logout}" method="post" class="ml-2">
+                <button class="btn btn-outline-secondary" type="submit">Logout</button>
+            </form>
+        </div>
+    </header>
+
+    <div class="table-responsive mt-4">
+        <table class="table table-bordered">
+            <thead class="thead-dark">
+                <tr>
+                    <th>№</th>
+                    <th>Дата (дд-мм-рррр)</th>
+                    <th>Кількість</th>
+                    <th>Одиниці</th>
+                    <th>Товар</th>
+                    <th>Юр_особа</th>
+                    <th>Замовник</th>
+                    <th>Пункт_вiдвантаження</th>
+                    <th>Локацiя</th>
+                    <th>Контакти</th>
+                    <th>ФИО</th>
+                    <th>Цiна</th>
+                    <th>Додаткова_iнформацiя</th>
+                </tr>
+            </thead>
+            <tbody id="orderList">
+                <!-- Здесь будут ваши данные -->
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<footer class="container mt-3">
+    <p class="text-center">Support email: ynb4work@gmail.com</p>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.7.7/handlebars.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/handlebars/dist/handlebars.min.js"></script>
+<script src="script.js"></script>
+<script th:inline="javascript">
+    // Функция для форматирования даты в JavaScript
+    function formatDate(dateString) {
+        const options = { day: '2-digit', month: '2-digit', year: 'numeric' };
+        const formattedDate = new Date(dateString).toLocaleDateString('ua-UA', options);
+        return formattedDate;
+    }
+
+    // Функция для заполнения таблицы данными
+    function fillTableWithData(data) {
+        const tableBody = document.getElementById('orderList');
+        tableBody.innerHTML = ''; // Очистим содержимое таблицы перед заполнением
+
+        data.forEach(function (order, index) {
+            const row = document.createElement('tr');
+
+            // Здесь вы можете добавить другие ячейки с данными, если это необходимо
+
+            // Пример для колонки "Дата"
+            const dateCell = document.createElement('td');
+            dateCell.textContent = formatDate(order.dateField); // Используем функцию для форматирования даты
+            row.appendChild(dateCell);
+
+            // Добавляем строку в таблицу
+            tableBody.appendChild(row);
+        });
+    }
+
+    // Ваш код для получения данных и вызова fillTableWithData(data)
+
+</script>
+
+</body>
+</html>
